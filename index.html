@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sheet — find free sheet music for your instrument</title>
+  <meta name="description" content="Pick your instrument, search for a song and find free, legal sheet music from IMSLP, the Mutopia Project and the Internet Archive.">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    try { document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem('sheet:scheme') ?? 'light dark'; } catch {}
+  </script>
+  <meta name="theme-color" content="#fbf6f3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#140f1c" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Sheet">
+  <script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));</script>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <header class="topbar">
+    <div class="brand-wrap">
+      <a class="brand" href="./">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="8" y="2.5" width="20" height="25" rx="4.5" class="logo-back" transform="rotate(9 18 15)"/>
+          <rect x="4" y="4.5" width="20" height="25" rx="4.5" class="logo-front"/>
+          <path d="M8 11h12M8 15h12M8 19h12M8 23h12" class="logo-staff"/>
+          <path d="M12.5 21.5V12.5l7-1.8v9" class="logo-stem"/>
+          <ellipse cx="11" cy="21.7" rx="2.2" ry="1.7" class="logo-head"/>
+          <ellipse cx="18" cy="19.9" rx="2.2" ry="1.7" class="logo-head"/>
+        </svg>
+        <span>Sheet</span>
+      </a>
+      <p class="credit">Made with ❤️ by <a href="https://mco.dev/">Marc</a></p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" command="show-modal" commandfor="about" aria-label="About Sheet">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.75" r="0.6" fill="currentColor"/></svg>
+      </button>
+      <button class="icon-btn" type="button" command="show-modal" commandfor="settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4.5v5M6 14.5v5"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <h1>Free sheet music for <span class="hero-inst" id="hero-inst">piano</span></h1>
+      <p class="tagline">Pick your instrument, search for a song, and Sheet looks through the big libraries of free, legal scores for you.</p>
+    </section>
+
+    <form class="finder" id="finder" role="search">
+      <fieldset class="instruments" id="instruments">
+        <legend>Instrument</legend>
+        <div class="inst-list" id="inst-list"></div>
+        <button type="button" class="more-inst" id="more-inst" aria-expanded="false">More instruments</button>
+      </fieldset>
+
+      <div class="search-row">
+        <label class="visually-hidden" for="q">Song or piece</label>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input type="search" id="q" name="q" placeholder="Song, piece or composer" autocomplete="off" spellcheck="false" enterkeyhint="search" required>
+        </div>
+        <button class="primary-btn" type="submit">Find music</button>
+      </div>
+
+      <div class="suggest" id="suggest">
+        <span class="suggest-label" id="suggest-label">Try</span>
+        <ul class="suggest-list" id="suggest-list" aria-labelledby="suggest-label"></ul>
+      </div>
+    </form>
+
+    <section class="results" id="results" aria-live="polite" hidden>
+      <div class="results-head">
+        <h2 id="results-title"></h2>
+        <ul class="sources" id="sources"></ul>
+      </div>
+      <div class="group" id="matches">
+        <ol class="cards" id="match-list"></ol>
+      </div>
+      <p class="empty" id="empty" hidden></p>
+      <details class="group others" id="others" hidden>
+        <summary><span id="others-title"></span></summary>
+        <ol class="cards" id="other-list"></ol>
+      </details>
+      <section class="elsewhere" aria-labelledby="elsewhere-title">
+        <h3 id="elsewhere-title">Keep looking</h3>
+        <p class="muted" id="elsewhere-note">Songs from the last hundred years or so are usually still under copyright, so the public-domain libraries rarely have them. Players share their own free arrangements on MuseScore and 8notes, or you can search further afield:</p>
+        <ul class="links" id="links"></ul>
+      </section>
+    </section>
+
+    <footer class="copyright">© 2026 Marc Cohen</footer>
+  </main>
+
+  <template id="card-tpl">
+    <li class="card">
+      <a class="thumb" target="_blank" rel="noopener"></a>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="src-badge"></span>
+          <span class="fit"></span>
+        </div>
+        <h3 class="card-title"><a target="_blank" rel="noopener"></a></h3>
+        <p class="byline"></p>
+        <p class="for"></p>
+        <a class="preview" target="_blank" rel="noopener" hidden><img alt="" loading="lazy" decoding="async"></a>
+        <p class="facts"></p>
+        <div class="card-actions"></div>
+      </div>
+    </li>
+  </template>
+
+  <dialog id="settings" aria-labelledby="settings-title" closedby="any">
+    <header class="dialog-head"><h2 id="settings-title">Settings</h2></header>
+    <div class="dialog-body">
+      <fieldset class="field">
+        <legend>Appearance</legend>
+        <div class="segmented" id="scheme">
+          <label><input type="radio" name="scheme" value="light dark"><span>System</span></label>
+          <label><input type="radio" name="scheme" value="light"><span>Light</span></label>
+          <label><input type="radio" name="scheme" value="dark"><span>Dark</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field">
+        <legend>Recent searches</legend>
+        <p class="help">Sheet remembers your last few searches on this device to make them quick to repeat.</p>
+        <div class="btn-row">
+          <button type="button" class="soft-btn" id="clear-recent">Forget recent searches</button>
+          <button type="button" class="soft-btn" id="install" hidden>Install app</button>
+        </div>
+      </fieldset>
+    </div>
+    <form method="dialog" class="dialog-foot"><button class="primary-btn">Done</button></form>
+  </dialog>
+
+  <dialog id="about" aria-labelledby="about-title" closedby="any">
+    <header class="dialog-head"><h2 id="about-title">About Sheet</h2></header>
+    <div class="dialog-body about">
+      <p>Sheet finds free sheet music for the instrument you play. Pick an instrument, type the name of a song or piece, and it searches three free libraries at once, putting the scores written or arranged for your instrument first.</p>
+      <div>
+        <h3>Where the music comes from</h3>
+        <ul>
+          <li><a href="https://imslp.org/" target="_blank" rel="noopener">IMSLP</a>, the Petrucci Music Library: more than 700,000 public-domain scores, mostly classical, with many arrangements.</li>
+          <li><a href="https://www.mutopiaproject.org/" target="_blank" rel="noopener">The Mutopia Project</a>: beautifully typeset, freely licensed editions you can download as PDF or MIDI.</li>
+          <li><a href="https://archive.org/details/sheetmusic" target="_blank" rel="noopener">The Internet Archive</a>: scans of old printed sheet music, including thousands of popular songs from the 1800s and early 1900s.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>A word about copyright</h3>
+        <p>Most of this music is in the public domain, but the rules differ from country to country, and a few items carry their own license. Check the score's page before you perform, record or share it. Recent songs are almost always still under copyright, which is why Sheet also points you to sites where players share their own arrangements.</p>
+      </div>
+      <div>
+        <h3>Privacy</h3>
+        <p>There's no account and no tracking. Your searches go to the libraries above (IMSLP and Mutopia by way of mco.dev), and your instrument and recent searches stay on this device.</p>
+      </div>
+    </div>
+    <form method="dialog" class="dialog-foot"><button class="primary-btn" autofocus>Close</button></form>
+  </dialog>
+
+  <noscript><p class="empty">Sheet needs JavaScript to search.</p></noscript>
+</body>
+</html>
