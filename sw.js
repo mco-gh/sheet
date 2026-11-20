@@ -1,7 +1,7 @@
 // Offline support: network first, falling back to the cached app shell.
 // Searches need the network anyway; this keeps the app opening instantly and
 // working as an installed app. Bump VERSION whenever any file below changes.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `sheet-${VERSION}`;
 const ASSETS = [
   './',
